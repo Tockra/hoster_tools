@@ -6,7 +6,7 @@ pub struct DNSManager {
 }
 
 impl DNSManager {
-    const LOGIN_URL: &'static str = "https://";
+    const LOGIN_URL: &'static str = "https://onyxhosting.de/dologin.php";
 
     fn new(username: &str, password: &str) -> Result<Self, String> {
         
