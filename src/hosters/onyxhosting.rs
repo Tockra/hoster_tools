@@ -5,7 +5,7 @@ pub struct DNSManager {
 }
 
 impl DNSManager {
-    const LOGIN_URL: &'static str = "https://httpbin.org/anything"; //"https://onyxhosting.de/dologin.php";
+    const LOGIN_URL: &'static str = "https://onyxhosting.de/dologin.php";
 
     pub fn new(username: &'static str, password: &'static str) -> Result<Self, String> {
         
@@ -14,19 +14,14 @@ impl DNSManager {
         })
     }
 
-    pub fn check_login(&self) -> Result<(), String> {
-        let client = ClientBuilder::new().cookie_store(true).user_agent("curl/7.58.0").build().unwrap();
-        println!("{:?}", client.post(Self::LOGIN_URL)
-            .form(&self.login_form));
-        println!("{:?}", self.login_form);
+    pub fn check_login(&self) -> Result<bool, String> {
+        let client = ClientBuilder::new().cookie_store(true).build().unwrap();
+ 
         let response = client.post(Self::LOGIN_URL)
             .form(&self.login_form)
             .send()
             .map_err(|_|format!("Probleme bei Verbindungsaufbau mit {}", Self::LOGIN_URL))?;
-        println!("{}", response.text().unwrap());
-        //println!("{:?}", response.url().as_str());
-        
-        //println!("{:?}", response.url().as_str().contains("incorrect=true"));
-        Ok(())
+ 
+        Ok(!response.url().as_str().contains("incorrect=true"))
     }
 }
