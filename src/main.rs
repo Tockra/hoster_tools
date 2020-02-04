@@ -1,9 +1,12 @@
 use hosters::onyxhosting::DNSManager;
 
 fn main() {
-    let dns_manager = DNSManager::new("tim.tannert@tu-dortmund.de", "").unwrap();
+    let dns_manager = DNSManager::new("tim.tannert@tu-dortmund.de", "");
 
-    println!("Login {}",if dns_manager.check_login().unwrap() {"Korrekt"} else {"Inkorrekt"});
+    match dns_manager {
+        Err(e) => println!("LoginProblem {:?}", e),
+        Ok(x) => x.get_domains(),
+    }
 
 }
 
