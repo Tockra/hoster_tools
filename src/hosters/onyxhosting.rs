@@ -225,6 +225,10 @@ impl DNSManager {
             return Err(LoginError::UnknownRecordType);
         }
 
+        if domain == "" || !domain.contains(".") {
+            return Err(LoginError::DomainNotFound);
+        }
+
         // for all following methods should this method make a new login if the cookie isn't still logged in.
         self.check_login_status()?;
 
