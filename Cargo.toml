@@ -1,6 +1,6 @@
 [package]
 name = "hoster_tools"
-version = "0.1.0"
+version = "1.0.0"
 authors = ["Tim <tim.tannert@tu-dortmund.de>"]
 edition = "2018"
 
