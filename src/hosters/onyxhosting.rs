@@ -260,6 +260,7 @@ impl DNSManager {
                 }
             }
         } else {
+            current_records.pop();
             current_records.push(new_record);
         }
 
