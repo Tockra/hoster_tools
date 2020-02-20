@@ -110,6 +110,7 @@ impl DNSManager {
     }
 
     /// trys to login with the username and password given to the constructor
+    #[inline]
     fn login(&self) -> Result<(),LoginError> {
         // requests a token
         let token = self.get_token(Self::CLIENTAREA_URL)?;
@@ -131,6 +132,7 @@ impl DNSManager {
 
     /// This method returns the token String 
     /// catched from `CLIENTAREA_URL`. If something fails it returns a corresponding LoginError.
+    #[inline]
     fn get_token(&self, token_url: &str) -> Result<String, LoginError> {
         let response = self.client.get(token_url).send().map_err(|_| LoginError::HTTPConnectionError(String::from(token_url)))?.text().map_err(|_| LoginError::HTTPConnectionError(String::from(token_url)))?;
         
@@ -148,7 +150,12 @@ impl DNSManager {
         }
     }
 
+    #[inline]
     fn get_domain_id(&self, domain: &str) -> Result<String,LoginError> {
+        if domain == "" || !domain.contains(".") {
+            return Err(LoginError::DomainNotFound);
+        }
+
         let document = Document::from(self.client.get(Self::DOMAIN_URL).send().unwrap().text().unwrap().as_str());
         let tmp = document.find(Attr("id", "tableDomainsList"));
         let domain_tables: Vec<Node> = tmp.collect();
@@ -164,7 +171,7 @@ impl DNSManager {
                     if !node.text().contains(domain) {
                         return Err(LoginError::DomainNotFound);
                     } else {
-                        // this confusion line just parses the onclick attribute to extract the domain id from the given url
+                        // this confusing line just parses the onclick attribute to extract the domain id from the given url
                         let domain_id = node.attr("onclick").unwrap().split("=").collect::<Vec<_>>().last().map_or(Err(LoginError::UnknownParseError(format!("Problems to parse the domain-id"))), |x| Ok(x))?.split("\'").nth(0).map_or(Err(LoginError::UnknownParseError(format!("Problems to parse the domain-id"))), |x| Ok(x))?;
                         return Ok(String::from(domain_id));
                     }
@@ -176,6 +183,7 @@ impl DNSManager {
         Err(LoginError::UnknownParseError(format!("Unexspected structure of the response of {}", Self::DOMAIN_URL)))
     }
 
+    #[inline]
     fn get_current_records(&self, domain: &str) -> Result<(String, String, Vec<Record>), LoginError> {
         let domain_id = self.get_domain_id(domain)?;
 
@@ -212,6 +220,7 @@ impl DNSManager {
     }
 
     /// Checks the current login status. If the login run out this method logins again. 
+    #[inline]
     fn check_login_status(&self) -> Result<(),LoginError> {
         if !self.client.get(Self::CLIENTAREA_URL).send().unwrap().text().unwrap().as_str().contains("Willkommen zurück") {
             self.login()?;
@@ -224,13 +233,10 @@ impl DNSManager {
     }
 
     /// This method will update the address (`address`) of the given record of the domain (`domain`). If there isn't still a record it will add a new record
+    #[inline]
     pub fn add_dns_record(&self, domain: &str, host: &str, rtype: &str, address: &str) -> Result<(),LoginError> {
         if rtype != "A" && rtype != "AAAA" && rtype != "MXE" && rtype != "MX" && rtype != "CNAME" && rtype != "URL" && rtype != "FRAME" && rtype != "TXT" {
             return Err(LoginError::UnknownRecordType);
-        }
-
-        if domain == "" || !domain.contains(".") {
-            return Err(LoginError::DomainNotFound);
         }
 
         // for all following methods should this method make a new login if the cookie isn't still logged in.
@@ -261,6 +267,7 @@ impl DNSManager {
     }
 
     /// This method pushs the Records in `records` to the dns server
+    #[inline]
     fn push_record_list(&self, token: String, domain_id: String, records: Vec<Record>) -> Result<(),LoginError> {
         let dns_form = Self::build_form(token,domain_id,records);
 
@@ -276,6 +283,7 @@ impl DNSManager {
         }
     }
 
+    #[inline]
     fn build_form(token: String, domain_id: String, records: Vec<Record>) -> Box<[(String, String)]> {
         let mut form = vec![("token", token.as_str()), ("sub", "save"), ("domainid", domain_id.as_str())];
 
