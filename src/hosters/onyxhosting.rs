@@ -260,8 +260,9 @@ impl DNSManager {
                 }
             }
         } else {
-            current_records.pop();
-            current_records.push(new_record);
+            // Aufgrund eines aufgetretenen Fehlers, wird hier temporär nur noch geupdated
+            //current_records.pop();
+            //current_records.push(new_record);
         }
 
         Ok(self.push_record_list(token, domain_id, current_records)?)
