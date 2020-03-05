@@ -257,6 +257,7 @@ impl DNSManager {
             for i in 0..current_records.len() {
                 if current_records[i] == new_record {
                     current_records[i].address = new_record.address.clone();
+                    break;
                 }
             }
         } else {
