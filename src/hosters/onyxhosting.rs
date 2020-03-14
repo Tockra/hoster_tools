@@ -1,3 +1,6 @@
+extern crate regex;
+
+use regex::Regex;
 use reqwest::blocking::ClientBuilder;
 use reqwest::blocking::Client;
 use std::fmt::Debug;
@@ -18,6 +21,7 @@ pub enum LoginError {
     HTTPConnectionError(String),
     UnknownParseError(String),
     UnknownRecordType,
+    IpFormatError,
 }
 
 #[derive(Debug)]
@@ -235,9 +239,16 @@ impl DNSManager {
     /// This method will update the address (`address`) of the given record of the domain (`domain`). If there isn't still a record it will add a new record
     #[inline]
     pub fn add_dns_record(&self, domain: &str, host: &str, rtype: &str, address: &str) -> Result<(),LoginError> {
+        let re_ip = Regex::new(r"^\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}$").unwrap();
+        
         if rtype != "A" && rtype != "AAAA" && rtype != "MXE" && rtype != "MX" && rtype != "CNAME" && rtype != "URL" && rtype != "FRAME" && rtype != "TXT" {
             return Err(LoginError::UnknownRecordType);
         }
+
+        if !re_ip.is_match(&address) {
+            return Err(LoginError::IpFormatError);
+        }
+
 
         // for all following methods should this method make a new login if the cookie isn't still logged in.
         self.check_login_status()?;
